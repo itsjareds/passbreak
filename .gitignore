@@ -29,6 +29,8 @@
 *.hex
 
 *.bak
+*.swp
+*.swo
 
 passwordBreaker
 passwordServer
