@@ -75,10 +75,9 @@ int main(int argc, char *argv[])
     /* Recv a response */
     printf("UDPEchoClient: And now wait for a response... \n");    
     fromSize = sizeof(fromAddr);
-    if ((respStringLen = recvfrom(sock, echoBuffer, ECHOMAX, 0, 
-         (struct sockaddr *) &fromAddr, &fromSize)) != echoStringLen)
-        DieWithError("recvfrom() failed");
-
+    respStringLen = recvfrom(sock, echoBuffer, ECHOMAX, 0, 
+         (struct sockaddr *) &fromAddr, &fromSize);
+    
     if (echoServAddr.sin_addr.s_addr != fromAddr.sin_addr.s_addr)
     {
         fprintf(stderr,"Error: received a packet from unknown source \n");
@@ -86,6 +85,17 @@ int main(int argc, char *argv[])
     /* null-terminate the received data */
     echoBuffer[respStringLen] = '\0';
     printf("UDPEchoClient:  Received the following (%d bytes) data: %s\n",respStringLen,echoBuffer);
+
+    int respCode = atoi(echoBuffer);
+
+    /* Interpret server response */
+    if (respCode == 0)
+        printf("Successfully cracked the password: %s\n",echoString);
+    else if (respCode == 1)
+        printf("Incorrect password: %s\n",echoString);
+    else
+        printf("Unknown response code %d\n",respCode);
+
     close(sock);
     exit(0);
 }

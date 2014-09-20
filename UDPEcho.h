@@ -21,7 +21,7 @@
 #include <netdb.h>      /* for getHostByName() */
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <unistd.h>     /* for close() */
-#include <time.h>		/* for seeding rand() */
+#include <time.h>       /* for seeding rand() */
 
 
 #define ECHOMAX 255     /* Longest string to echo */
