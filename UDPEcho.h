@@ -1,6 +1,8 @@
 /*********************************************************
 *
-* Module Name: UDP Echo client/server header file
+* Module Name: UDP client/server header file
+*
+* Author: (provided file by S. Remy)
 *
 * File Name:    UDPEcho.h	
 *
@@ -8,6 +10,12 @@
 *  This file contains common stuff for the client and server
 *
 * Revisions:
+*
+* Methods:
+*
+*  void DieWithError(char *errorMessage):
+*    o  errorMessage: Message to output before exit
+*    Exits the program and prints an error message.
 *
 *********************************************************/
 #include <stdio.h>

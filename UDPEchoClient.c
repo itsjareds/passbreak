@@ -1,22 +1,43 @@
 /*********************************************************
 *
-* Module Name: UDP Echo client source 
-
+* Module Name: Password Breaker
+*
+* Author: Jared Klingenberger <klinge2@clemson.edu>
+*
 * File Name:    UDPEchoClient.c
 *
 * Summary:
-*  This file contains the echo client code.
+*  This file codes the password breaker client.
 *
 * Revisions:
 *
+* Methods:
+*
+*  void clientCNTCCode():
+*    Handles SIGINT signals.
+*
+*  void generatePassword(char pass[], int N):
+*    o  pass: Character array to place the new password
+*    o  N: Length of password to generate
+*    Increments the password with LSB on the left.
+*
+*  char getNextChar(char c):
+*    o  c: current character
+*    Returns the character in the sequence following c.
+*
+*  void end(int exitCode):
+*    o  exitCode: Code to pass to exit()
+*    Quits the program and outputs time elapsed.
+*
 *********************************************************/
+
 #include "UDPEcho.h"
 #include <signal.h>
 
+#define VERBOSE 0
 
 void clientCNTCCode();
-void generatePassword(char pass[], int N, int *index);
-void increment(char pass[], int N, int *index);
+void generatePassword(char pass[], int N);
 char getNextChar(char c);
 void end(int exitCode);
 
@@ -32,13 +53,13 @@ int main(int argc, char *argv[])
     unsigned short echoServPort;     /* Echo server port */
     unsigned int fromSize;           /* In-out of address size for recvfrom() */
     char *servIP;                    /* IP address of server */
-    char *echoString;                /* String to send to echo server */
     char echoBuffer[ECHOMAX+1];      /* Buffer for receiving echoed string */
     int respStringLen;               /* Length of received response */
     char *respCode;                  /* Response code from the server */
     int N;                           /* Length of password to guess */
     int index;                       /* Index of bit to increment */
     struct timeval tv_to;            /* Timeout struct */
+    char *pass;                      /* Password char array */
     int retry;
 
     gettimeofday(&tv_start, NULL);
@@ -62,9 +83,10 @@ int main(int argc, char *argv[])
     }
 
     /* Reserve memory for the password */
-    echoString = (char*) malloc(sizeof(char)*N + 1);
-    /* Signify that echoString is uninitialized */
-    index = -1;
+    pass = (char*) malloc(sizeof(char)*N + 1);
+    memset(pass, '0', N+1);
+    pass[0] = '0'-1;
+    pass[N] = '\0';
 
     /* Create a datagram/UDP socket */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
@@ -91,11 +113,12 @@ int main(int argc, char *argv[])
     retry = 0;
     while (strcmp(respCode, "SUCCESS") != 0) {
         if (retry == 0)
-            generatePassword(echoString, N, &index);
+            generatePassword(pass, N);
         /* Send the string to the server */
-        printf("UDPEchoClient: Send the string: %s to the server: %s \n", echoString,servIP);    
-        if (sendto(sock, echoString, strlen(echoString), 0, (struct sockaddr *)
-                   &echoServAddr, sizeof(echoServAddr)) != strlen(echoString))
+        if (VERBOSE)
+            printf("UDPEchoClient: Send the string: %s to the server: %s \n", pass, servIP);    
+        if (sendto(sock, pass, strlen(pass), 0, (struct sockaddr *)
+                   &echoServAddr, sizeof(echoServAddr)) != strlen(pass))
           DieWithError("sendto() sent a different number of bytes than expected");
   
         /* Recv a response */
@@ -117,40 +140,31 @@ int main(int argc, char *argv[])
         }
         /* null-terminate the received data */
         echoBuffer[respStringLen] = '\0';
-        printf("UDPEchoClient:  Received the following (%d bytes) data: %s\n",respStringLen,echoBuffer);
+        if (VERBOSE)
+            printf("UDPEchoClient:  Received the following (%d bytes) data: %s\n",respStringLen,echoBuffer);
 
         respCode = echoBuffer;
 
         /* Interpret server response */
         if (strcmp(respCode, "SUCCESS") == 0) {
-            printf("Successfully cracked the password: %s\n", echoString);
+            printf("Successfully cracked the password: %s\n", pass);
         } else if (strcmp(respCode, "FAILURE") == 0) {
-            //printf("Incorrect password: %s\n",echoString);
+            //if (VERBOSE)
+                //printf("Incorrect password: %s\n", pass);
         } else
-            printf("Unknown response code %s\n",respCode);
+            fprintf(stderr,"Unknown response code %s\n",respCode);
     }
 
     close(sock);
     end(0);
 }
 
-void generatePassword(char pass[], int N, int *index) {
-    if (*index < 0) {
-        memset(pass, '0', N+1);
-        pass[N] = '\0';
-        (*index)++;
-    } else
-        increment(pass, N, index);
-}
-
-void increment(char pass[], int N, int *index) {
+void generatePassword(char pass[], int N) {
     int i, overflow = 1;
-    for (i = 0; i < N && overflow == 1 && i <= *index; i++) {
+    for (i = 0; i < N && overflow == 1; i++) {
         char c = getNextChar(pass[i]);
         pass[i] = c;
         overflow = (c == '0') ? 1 : 0;
-        if (overflow == 1 && i == (*index))
-            (*index)++;
     }
 }
 

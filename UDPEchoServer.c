@@ -1,5 +1,54 @@
+/***************************************************************
+*
+* Module Name: Password Server
+*
+* Author: Jared Klingenberger <klinge2@clemson.edu>
+*
+* File Name: UDPEchoServer.c
+*
+* Summary:
+*  Generates a random character password with N chars.
+*
+* Revisions:
+*
+* Methods:
+*
+*  void cntcHandler():
+*    Handle SIGINT signals and exits.
+*
+*  void generatePassword(char pass[], const int len):
+*    o  pass: Character array to place the password
+*    o  len: Length of password to generate
+*    Generates a random character sequence of len chars,
+*     then places the sequence into pass[].
+*
+*  void sendMessage(int sock, const char* message,
+*        size_t recvMsgSize, const struct sockaddr *clientAddr,
+*        socklen_t addrLen):
+*    o  sock: Socket file descriptor
+*    o  message: String message to send
+*    o  recvMsgSize: Length of message to send
+*    o  clientAddr: Client address struct to send to.
+*    o  addrLen: Size of clientAddr.
+*    Helper function to send messages more simply.
+*
+*  void updateClient(Client client):
+     o  client: struct client to update the client list
+*    Add to or update the client list with client information.
+*
+*  int findClient(char *addr):
+*    o  IP address string to search the client list
+*    Find a client in the client list based on IP address.
+*
+*  void printClients():
+*    Output the list of clients to stdout.
+*
+***************************************************************/ 
+
 #include "UDPEcho.h"
 #include <signal.h>
+
+#define VERBOSE 0
 
 typedef struct {
     char *addr;
@@ -78,7 +127,8 @@ int main(int argc, char *argv[])
         pass[i] = '\0';
     }
 
-    printf("UDPEchoServer: Using password %s\n", pass);
+    if (VERBOSE)
+        printf("UDPEchoServer: Using password %s\n", pass);
 
     /* Initialize array of client structs to zero */
     memset(&iplist, 0, sizeof(Client)*255);
@@ -97,7 +147,8 @@ int main(int argc, char *argv[])
     /* Bind to the local address */
     if (bind(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         DieWithError("bind() failed");
-    printf("UDPEchoServer: Now listening on port %d\n", echoServPort);
+    if (VERBOSE)
+        printf("UDPEchoServer: Now listening on port %d\n", echoServPort);
   
     for (;;) /* Run forever */
     {
@@ -115,7 +166,8 @@ int main(int argc, char *argv[])
         c.addr = (char*) malloc(sizeof(char)*17);
         strcpy(c.addr, inet_ntoa(echoClntAddr.sin_addr));
 
-        printf("Handling client %s\n", c.addr);
+        if (VERBOSE)
+            printf("Handling client %s\n", c.addr);
 
         /* Convert to a null-terminated string (don't care about bits past N-1) */
         echoBuffer[N] = '\0';
@@ -123,14 +175,17 @@ int main(int argc, char *argv[])
         /* Compare input to password */
         if (strcmp(echoBuffer, pass) == 0) {
             /* Send SUCCESS to the client */
-            printf("PASSWORD CRACKED! guess: %s  actual: %s\n", echoBuffer, pass);
+            if (VERBOSE)
+                printf("PASSWORD CRACKED! guess: %s  actual: %s\n", echoBuffer, pass);
             sendMessage(sock, "SUCCESS", 8, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
             generatePassword(pass, N);
-            printf("Using password %s\n", pass);
+            if (VERBOSE)
+                printf("Using password %s\n", pass);
             c.success = 1;
         } else {
             /* Send FAILURE to the client */
-            printf("Incorrect! guess: %s  actual: %s\n", echoBuffer, pass);
+            if (VERBOSE)
+                printf("Incorrect! guess: %s  actual: %s\n", echoBuffer, pass);
             sendMessage(sock, "FAILURE", 8, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
         }
         c.attempts = 1;
@@ -180,18 +235,20 @@ void sendMessage(int sock, const char* message, size_t recvMsgSize,
 }
 
 void updateClient(Client client) {
+    /* Check if the client is already in the table */
     int index = findClient(client.addr);
-    if (index < 0) {
+    if (index < 0)
        index = iplen++;
-       printf("Adding new client at iplist[%d]\n", index);
-    }
     if (iplist[index].addr != 0)
         free(iplist[index].addr);
+
+    /* Update entry */
     iplist[index].addr = client.addr;
     iplist[index].attempts += client.attempts;
     iplist[index].success += client.success;
 }
 
+/* Search for a client in iplist based on IP string */
 int findClient(char *addr) {
     int i;
     for (i = 0; i < iplen; i++) {
