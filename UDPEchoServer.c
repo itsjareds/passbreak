@@ -109,33 +109,31 @@ int main(int argc, char *argv[])
         if (equal) {
             /* Send SUCCESS to the client */
             printf("PASSWORD CRACKED! guess: %s  actual: %s\n", echoBuffer, pass);
-            sendMessage(sock, "0", 2, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
+            sendMessage(sock, "SUCCESS", 8, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
+            generatePassword(pass, N);
+            printf("Using password %s\n", pass);
         } else {
             /* Send FAILURE to the client */
             printf("Incorrect! guess: %s  actual: %s\n", echoBuffer, pass);
-            sendMessage(sock, "1", 2, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
+            sendMessage(sock, "FAILURE", 8, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
         }
-
-        /* Send received datagram back to the client */
-        sendMessage(sock, echoBuffer, recvMsgSize, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
     }
     /* NOT REACHED */
 }
 
+/* Precondition: pass[] is instantiated with N+1 bytes of memory */
 void generatePassword(char pass[], const int N) {
     static char vals[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    if (pass == NULL)
-        pass = (char*) malloc(sizeof(char)*N + 1);
+    /* Generate random character sequence */
     int i;
     for (i = 0; i < N; i++)
         pass[i] = vals[rand()%62];
-    pass[i] = '\0';
+    pass[N] = '\0';
 }
 
 void sendMessage(int sock, const char* message, size_t recvMsgSize,
                   const struct sockaddr *clientAddr, socklen_t addrLen) {
     int len = sendto(sock, message, recvMsgSize, 0, clientAddr, addrLen);
-    printf("Sent message expected size=%zu, actual size=%d\n", recvMsgSize, len);
     if (len != recvMsgSize)
         DieWithError("sendto() sent a different number of bytes than expected");
 }

@@ -42,7 +42,7 @@ clean:
 		rm -f ${PROGS} ${CLEANFILES}
 
 depend:
-		makedepend UDPEchoClient.c UDPEchoServer.c  $(CFLAGS) $(HEADERS) $(SOURCES) $(COMMONSOURCES) $(CSOURCES)
+		makedepend UDPEchoClient.c UDPEchoServer.c -I/usr/lib/gcc/x86_64-linux-gnu/4.6/include $(CFLAGS) $(HEADERS) $(SOURCES) $(COMMONSOURCES) $(CSOURCES)
 #		mkdep $(CFLAGS) $(HEADERS) $(SOURCES) $(COMMONSOURCES) $(CSOURCES)
 
 # DO NOT DELETE
@@ -50,9 +50,12 @@ depend:
 UDPEchoClient.o: UDPEcho.h /usr/include/stdio.h /usr/include/features.h
 UDPEchoClient.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
 UDPEchoClient.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-UDPEchoClient.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
-UDPEchoClient.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-UDPEchoClient.o: /usr/include/_G_config.h /usr/include/wchar.h
+UDPEchoClient.o: /usr/include/gnu/stubs-64.h
+UDPEchoClient.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stddef.h
+UDPEchoClient.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+UDPEchoClient.o: /usr/include/libio.h /usr/include/_G_config.h
+UDPEchoClient.o: /usr/include/wchar.h
+UDPEchoClient.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdarg.h
 UDPEchoClient.o: /usr/include/bits/stdio_lim.h
 UDPEchoClient.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
 UDPEchoClient.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
@@ -67,7 +70,8 @@ UDPEchoClient.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
 UDPEchoClient.o: /usr/include/asm-generic/errno.h
 UDPEchoClient.o: /usr/include/asm-generic/errno-base.h /usr/include/string.h
 UDPEchoClient.o: /usr/include/xlocale.h /usr/include/netinet/in.h
-UDPEchoClient.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+UDPEchoClient.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdint.h
+UDPEchoClient.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdint-gcc.h
 UDPEchoClient.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
 UDPEchoClient.o: /usr/include/bits/uio.h /usr/include/bits/socket.h
 UDPEchoClient.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
@@ -78,16 +82,20 @@ UDPEchoClient.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
 UDPEchoClient.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
 UDPEchoClient.o: /usr/include/bits/environments.h
 UDPEchoClient.o: /usr/include/bits/confname.h /usr/include/getopt.h
-UDPEchoClient.o: /usr/include/signal.h /usr/include/bits/signum.h
-UDPEchoClient.o: /usr/include/bits/siginfo.h /usr/include/bits/sigaction.h
-UDPEchoClient.o: /usr/include/bits/sigcontext.h /usr/include/bits/sigstack.h
-UDPEchoClient.o: /usr/include/sys/ucontext.h /usr/include/bits/sigthread.h
+UDPEchoClient.o: /usr/include/sys/time.h /usr/include/signal.h
+UDPEchoClient.o: /usr/include/bits/signum.h /usr/include/bits/siginfo.h
+UDPEchoClient.o: /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h
+UDPEchoClient.o: /usr/include/bits/sigstack.h /usr/include/sys/ucontext.h
+UDPEchoClient.o: /usr/include/bits/sigthread.h
 UDPEchoServer.o: UDPEcho.h /usr/include/stdio.h /usr/include/features.h
 UDPEchoServer.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
 UDPEchoServer.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-UDPEchoServer.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
-UDPEchoServer.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-UDPEchoServer.o: /usr/include/_G_config.h /usr/include/wchar.h
+UDPEchoServer.o: /usr/include/gnu/stubs-64.h
+UDPEchoServer.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stddef.h
+UDPEchoServer.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+UDPEchoServer.o: /usr/include/libio.h /usr/include/_G_config.h
+UDPEchoServer.o: /usr/include/wchar.h
+UDPEchoServer.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdarg.h
 UDPEchoServer.o: /usr/include/bits/stdio_lim.h
 UDPEchoServer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
 UDPEchoServer.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
@@ -102,7 +110,8 @@ UDPEchoServer.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
 UDPEchoServer.o: /usr/include/asm-generic/errno.h
 UDPEchoServer.o: /usr/include/asm-generic/errno-base.h /usr/include/string.h
 UDPEchoServer.o: /usr/include/xlocale.h /usr/include/netinet/in.h
-UDPEchoServer.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+UDPEchoServer.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdint.h
+UDPEchoServer.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdint-gcc.h
 UDPEchoServer.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
 UDPEchoServer.o: /usr/include/bits/uio.h /usr/include/bits/socket.h
 UDPEchoServer.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
@@ -113,12 +122,16 @@ UDPEchoServer.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
 UDPEchoServer.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
 UDPEchoServer.o: /usr/include/bits/environments.h
 UDPEchoServer.o: /usr/include/bits/confname.h /usr/include/getopt.h
+UDPEchoServer.o: /usr/include/sys/time.h
 DieWithError.o: /usr/include/stdio.h /usr/include/features.h
 DieWithError.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
 DieWithError.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-DieWithError.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
-DieWithError.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-DieWithError.o: /usr/include/_G_config.h /usr/include/wchar.h
+DieWithError.o: /usr/include/gnu/stubs-64.h
+DieWithError.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stddef.h
+DieWithError.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+DieWithError.o: /usr/include/libio.h /usr/include/_G_config.h
+DieWithError.o: /usr/include/wchar.h
+DieWithError.o: /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdarg.h
 DieWithError.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 DieWithError.o: /usr/include/stdlib.h /usr/include/bits/waitflags.h
 DieWithError.o: /usr/include/bits/waitstatus.h /usr/include/endian.h
