@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
              (struct sockaddr *) &fromAddr, &fromSize);
 
         /* Check for errors */
-        if (respStringLen < 0) {
+        if (respStringLen < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
              /* Dropped packet */
              retry = 1;
              continue;

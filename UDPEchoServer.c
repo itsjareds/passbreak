@@ -1,10 +1,23 @@
 #include "UDPEcho.h"
+#include <signal.h>
 
+typedef struct {
+    char *addr;
+    int attempts;
+    int success;
+} Client;
 
 void DieWithError(char *errorMessage);  /* External error handling function */
+void cntcHandler(); /* ^C handler */
 void generatePassword(char pass[], const int len);  /* Password generation function */
 void sendMessage(int sock, const char* message, size_t recvMsgSize,
                   const struct sockaddr *clientAddr, socklen_t addrLen);
+void updateClient(Client client);
+int findClient(char *addr);
+void printClients();
+
+Client iplist[255];
+int iplen;
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +40,8 @@ int main(int argc, char *argv[])
 
     /* Seed rand() with the unix timestamp */
     srand(time(NULL));
+
+    signal(SIGINT, cntcHandler);
 
     echoServPort = atoi(argv[1]);  /* First arg:  local port */
     N = atoi(argv[2]);             /* Second arg: password length */
@@ -65,6 +80,10 @@ int main(int argc, char *argv[])
 
     printf("UDPEchoServer: Using password %s\n", pass);
 
+    /* Initialize array of client structs to zero */
+    memset(&iplist, 0, sizeof(Client)*255);
+    iplen = 0;
+
     /* Create socket for sending/receiving datagrams */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
         DieWithError("socket() failed");
@@ -90,35 +109,57 @@ int main(int argc, char *argv[])
             (struct sockaddr *) &echoClntAddr, &cliAddrLen)) < 0)
             DieWithError("recvfrom() failed");
 
-        printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+        /* Build client struct for client list */
+        Client c;
+        memset(&c, 0, sizeof(Client));
+        c.addr = (char*) malloc(sizeof(char)*17);
+        strcpy(c.addr, inet_ntoa(echoClntAddr.sin_addr));
+
+        printf("Handling client %s\n", c.addr);
 
         /* Convert to a null-terminated string (don't care about bits past N-1) */
         echoBuffer[N] = '\0';
 
         /* Compare input to password */
-        int equal = 0;
-        if (recvMsgSize == N) {
-            int i;
-            for (i = 0; i < N; i++) {
-                if (pass[i] != echoBuffer[i])
-                    break;
-                if (i + 1 == N)
-                    equal = 1;
-            }
-        }
-        if (equal) {
+        if (strcmp(echoBuffer, pass) == 0) {
             /* Send SUCCESS to the client */
             printf("PASSWORD CRACKED! guess: %s  actual: %s\n", echoBuffer, pass);
             sendMessage(sock, "SUCCESS", 8, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
             generatePassword(pass, N);
             printf("Using password %s\n", pass);
+            c.success = 1;
         } else {
             /* Send FAILURE to the client */
             printf("Incorrect! guess: %s  actual: %s\n", echoBuffer, pass);
             sendMessage(sock, "FAILURE", 8, (struct sockaddr *) &echoClntAddr, sizeof(echoClntAddr));
         }
+        c.attempts = 1;
+
+        /* Update client list */
+        updateClient(c);
+
+        fflush(stdout);
     }
     /* NOT REACHED */
+}
+
+void cntcHandler() {
+    printf("Received SIGINT, quitting...\n");
+
+    /* Generate statistics */
+    int numAttempts = 0;
+    int numSuccess = 0;
+    int i;
+    for (i = 0; i < iplen; i++) {
+        if (iplist[i].addr != 0) {
+            numAttempts += iplist[i].attempts;
+            numSuccess += iplist[i].success;
+        }
+    }
+
+    printf("%d\t%d\n", numAttempts, numSuccess);
+    printClients();
+    exit(0);
 }
 
 /* Precondition: pass[] is instantiated with N+1 bytes of memory */
@@ -136,5 +177,38 @@ void sendMessage(int sock, const char* message, size_t recvMsgSize,
     int len = sendto(sock, message, recvMsgSize, 0, clientAddr, addrLen);
     if (len != recvMsgSize)
         DieWithError("sendto() sent a different number of bytes than expected");
+}
+
+void updateClient(Client client) {
+    int index = findClient(client.addr);
+    if (index < 0) {
+       index = iplen++;
+       printf("Adding new client at iplist[%d]\n", index);
+    }
+    if (iplist[index].addr != 0)
+        free(iplist[index].addr);
+    iplist[index].addr = client.addr;
+    iplist[index].attempts += client.attempts;
+    iplist[index].success += client.success;
+}
+
+int findClient(char *addr) {
+    int i;
+    for (i = 0; i < iplen; i++) {
+        if (iplist[i].addr != 0) {
+            if (strcmp(addr, iplist[i].addr) == 0)
+                break;
+        }
+    }
+    return (i < iplen) ? i : -1;
+}
+
+void printClients() {
+    int i;
+    for (i = 0; i < iplen; i++) {
+        if (iplist[i].addr != 0) {
+            printf("%s\n", iplist[i].addr);
+        }
+    }
 }
 

@@ -122,7 +122,11 @@ UDPEchoServer.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
 UDPEchoServer.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
 UDPEchoServer.o: /usr/include/bits/environments.h
 UDPEchoServer.o: /usr/include/bits/confname.h /usr/include/getopt.h
-UDPEchoServer.o: /usr/include/sys/time.h
+UDPEchoServer.o: /usr/include/sys/time.h /usr/include/signal.h
+UDPEchoServer.o: /usr/include/bits/signum.h /usr/include/bits/siginfo.h
+UDPEchoServer.o: /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h
+UDPEchoServer.o: /usr/include/bits/sigstack.h /usr/include/sys/ucontext.h
+UDPEchoServer.o: /usr/include/bits/sigthread.h
 DieWithError.o: /usr/include/stdio.h /usr/include/features.h
 DieWithError.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
 DieWithError.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
