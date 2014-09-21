@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
     int respStringLen;               /* Length of received response */
     char *respCode;                  /* Response code from the server */
     int N;                           /* Length of password to guess */
-    int index;                       /* Index of bit to increment */
     struct timeval tv_to;            /* Timeout struct */
     char *pass;                      /* Password char array */
     int retry;
